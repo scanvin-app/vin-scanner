@@ -1,0 +1,14 @@
+{
+  "name": "@vin-scanner/demo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite"
+  },
+  "dependencies": {
+    "vin-scanner": "*"
+  },
+  "devDependencies": {
+    "vite": "^6.3.0"
+  }
+}

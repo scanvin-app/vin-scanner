@@ -1,0 +1,12 @@
+node_modules/
+dist/
+*.log
+.DS_Store
+
+# e2e artefacts
+apps/demo/e2e/out/
+
+# copied into the package by `prepack` (canonical copies live at the repo root)
+packages/vin-scanner/README.md
+packages/vin-scanner/LICENSE
+packages/vin-scanner/NOTICE.md

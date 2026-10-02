@@ -1,0 +1,57 @@
+{
+  "name": "vin-scanner",
+  "version": "0.1.0",
+  "description": "Mobile-first VIN scanner web component: YOLO detection + PaddleOCR recognition in the browser via onnxruntime-web, with temporal consensus across video frames.",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "sideEffects": true,
+  "main": "./src/index.js",
+  "module": "./src/index.js",
+  "exports": {
+    ".": {
+      "import": "./src/index.js"
+    },
+    "./models/*": "./models/*",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "models",
+    "NOTICE.md"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "smoke": "bash ../../scripts/synthetic-vin-image.sh \"${TMPDIR:-/tmp}/vin-scanner-smoke.png\" && node scripts/smoke-node.mjs \"${TMPDIR:-/tmp}/vin-scanner-smoke.png\"",
+    "prepack": "cp ../../README.md ../../LICENSE ../../NOTICE.md ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scanvin-app/vin-scanner.git",
+    "directory": "packages/vin-scanner"
+  },
+  "homepage": "https://scanvin.app",
+  "bugs": {
+    "url": "https://github.com/scanvin-app/vin-scanner/issues"
+  },
+  "keywords": [
+    "vin",
+    "vin-scanner",
+    "vin-ocr",
+    "ocr",
+    "onnx",
+    "onnxruntime-web",
+    "yolo",
+    "paddleocr",
+    "web-component",
+    "custom-element",
+    "computer-vision",
+    "camera",
+    "mobile"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "onnxruntime-web": "^1.24.2"
+  }
+}

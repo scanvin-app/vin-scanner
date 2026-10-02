@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>vin-scanner demo</title>
+    <style>
+      body { font-family: system-ui, sans-serif; margin: 2rem; max-width: 640px; }
+      button { font-size: 1.1rem; padding: 0.6rem 1.4rem; }
+      pre { background: #f0f0f0; padding: 0.75rem; overflow-x: auto; font-size: 0.8rem; }
+    </style>
+  </head>
+  <body>
+    <h1>vin-scanner demo</h1>
+    <p>
+      Camera access needs a secure context: open this page on <code>localhost</code>, or over
+      HTTPS on a phone (e.g. <code>vite --host</code> behind a local TLS proxy). Hosted demo:
+      <a href="https://scanvin.app/en/scan-vin/">scanvin.app/en/scan-vin/</a>.
+    </p>
+    <button id="start">Start scanner</button>
+    <label style="margin-left:1rem">locale
+      <select id="locale"></select>
+    </label>
+    <pre id="log"></pre>
+
+    <vin-scanner
+      id="scanner"
+      detector-src="/models/vin_detector.onnx"
+      rec-src="/models/ppocr-rec.onnx"
+      dict-src="/models/vin_dict.txt"
+      ngram-src="/models/vin_ngram.json"
+      wasm-src="/ort/ort-wasm-simd-threaded.wasm"
+      locale="en"
+    ></vin-scanner>
+
+    <script type="module">
+      import "vin-scanner";
+      import { SUPPORTED_LOCALES } from "vin-scanner/src/element/i18n.js";
+
+      const scanner = document.getElementById("scanner");
+      const log = (line) => {
+        document.getElementById("log").textContent += line + "\n";
+      };
+
+      const localeSelect = document.getElementById("locale");
+      for (const locale of SUPPORTED_LOCALES) {
+        const option = document.createElement("option");
+        option.value = locale;
+        option.textContent = locale;
+        localeSelect.append(option);
+      }
+      localeSelect.addEventListener("change", (e) => {
+        scanner.setAttribute("locale", e.target.value);
+      });
+
+      for (const name of [
+        "scan-opened",
+        "scan-closed",
+        "scan-state-changed",
+        "scan-vin-found",
+        "scan-vin-not-found",
+        "scan-camera-error",
+        "scan-model-error",
+        "scan-ocr-error",
+      ]) {
+        scanner.addEventListener(name, (e) => log(`${name} ${JSON.stringify(e.detail)}`));
+      }
+      let lastProgressLog = 0;
+      scanner.addEventListener("scan-model-progress", (e) => {
+        const mb = (e.detail.loaded / 1048576).toFixed(1);
+        if (performance.now() - lastProgressLog > 500) {
+          lastProgressLog = performance.now();
+          log(`scan-model-progress ${mb} MB`);
+        }
+      });
+
+      document.getElementById("start").addEventListener("click", async () => {
+        const support = await scanner.open();
+        log(`open() → ${JSON.stringify(support)}`);
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+  <head><meta charset="utf-8" /><title>worker debug</title></head>
+  <body>
+    <script type="module">
+      console.log("page: spawning worker");
+      const worker = new Worker(new URL("vin-scanner/src/worker/scanner.worker.js", import.meta.url), {
+        type: "module",
+      });
+      worker.onmessage = (e) => console.log("worker msg:", JSON.stringify(e.data).slice(0, 300));
+      worker.onerror = (e) => console.log("worker onerror:", e.message, e.filename, e.lineno);
+      worker.onmessageerror = (e) => console.log("worker messageerror");
+      worker.postMessage({
+        type: "init",
+        detectorUrl: new URL("/models/vin_detector.onnx", location.href).href,
+        recUrl: new URL("/models/ppocr-rec.onnx", location.href).href,
+        dictUrl: new URL("/models/vin_dict.txt", location.href).href,
+        wasmUrl: new URL("/ort/ort-wasm-simd-threaded.wasm", location.href).href,
+        config: {},
+      });
+      setInterval(() => console.log("page: alive", performance.now().toFixed(0)), 2000);
+    </script>
+  </body>
+</html>

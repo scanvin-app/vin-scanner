@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>vin-scanner e2e</title>
+  </head>
+  <body>
+    <pre id="result" data-test-result="pending">pending</pre>
+    <pre id="log"></pre>
+
+    <vin-scanner
+      id="scanner"
+      detector-src="/models/vin_detector.onnx"
+      rec-src="/models/ppocr-rec.onnx"
+      dict-src="/models/vin_dict.txt"
+      ngram-src="/models/vin_ngram.json"
+      wasm-src="/ort/ort-wasm-simd-threaded.wasm"
+      locale="en"
+    ></vin-scanner>
+
+    <script type="module">
+      import "vin-scanner";
+
+      // The fake capture device plays the synthetic VIN image rendered by
+      // scripts/synthetic-vin-image.sh; the runner passes the VIN via ?vin=.
+      const EXPECTED_VIN = new URLSearchParams(location.search).get("vin") ?? "WVWZZZ1K68W123456";
+
+      const resultEl = document.getElementById("result");
+      const logEl = document.getElementById("log");
+      const log = (line) => {
+        logEl.textContent += line + "\n";
+      };
+      const finish = (pass, message) => {
+        if (resultEl.dataset.testResult !== "pending") return;
+        resultEl.dataset.testResult = pass ? "pass" : "fail";
+        resultEl.textContent = message;
+      };
+
+      const scanner = document.getElementById("scanner");
+      for (const name of [
+        "scan-state-changed",
+        "scan-camera-error",
+        "scan-model-error",
+        "scan-ocr-error",
+        "scan-vin-not-found",
+      ]) {
+        scanner.addEventListener(name, (e) => log(`${name} ${JSON.stringify(e.detail)}`));
+      }
+      scanner.addEventListener("scan-vin-found", (e) => {
+        log(`scan-vin-found ${JSON.stringify(e.detail)}`);
+        finish(
+          e.detail.vin === EXPECTED_VIN,
+          e.detail.vin === EXPECTED_VIN
+            ? `pass: ${e.detail.vin} (tier ${e.detail.tier})`
+            : `fail: read ${e.detail.vin}, expected ${EXPECTED_VIN}`
+        );
+      });
+      for (const name of ["scan-camera-error", "scan-model-error"]) {
+        scanner.addEventListener(name, (e) => finish(false, `fail: ${name} ${e.detail.message}`));
+      }
+
+      setTimeout(() => finish(false, "fail: timeout without scan-vin-found"), 25000);
+
+      try {
+        const support = await scanner.open();
+        log(`open() → ${JSON.stringify(support)} decoder=${scanner.decoder}`);
+        if (!support.supported) finish(false, `fail: unsupported ${support.missing.join(",")}`);
+      } catch (error) {
+        finish(false, `fail: open() threw ${error.message}`);
+      }
+    </script>
+  </body>
+</html>

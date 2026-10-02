@@ -1,0 +1,18 @@
+{
+  "name": "vin-scanner-monorepo",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm --workspace apps/demo run dev",
+    "test": "npm --workspaces --if-present test",
+    "smoke": "npm --workspace packages/vin-scanner run smoke",
+    "e2e": "bash apps/demo/e2e/run.sh"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
