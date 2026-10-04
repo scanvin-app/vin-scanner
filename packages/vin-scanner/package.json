@@ -1,6 +1,6 @@
 {
   "name": "vin-scanner",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Mobile-first VIN scanner web component: YOLO detection + PaddleOCR recognition in the browser via onnxruntime-web, with temporal consensus across video frames.",
   "license": "AGPL-3.0-only",
   "type": "module",
@@ -12,6 +12,7 @@
       "import": "./src/index.js"
     },
     "./models/*": "./models/*",
+    "./src/*": "./src/*",
     "./package.json": "./package.json"
   },
   "files": [

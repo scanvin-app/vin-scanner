@@ -38,8 +38,20 @@ const DEFAULT_DETECT_INTERVAL_MS = 200;
 const MANUAL_BURST_FRAMES = 3;
 const HINT_AFTER_MS = 15000;
 
-const TEMPLATE = document.createElement("template");
-TEMPLATE.innerHTML = `
+// Importing this module must not touch the DOM: SSR frameworks (Astro, Next, Nuxt) evaluate
+// it on the server when the host page imports the package root.
+const BaseElement = typeof HTMLElement === "undefined" ? class {} : HTMLElement;
+
+let template = null;
+function getTemplate() {
+  if (!template) {
+    template = document.createElement("template");
+    template.innerHTML = TEMPLATE_HTML;
+  }
+  return template;
+}
+
+const TEMPLATE_HTML = `
   <style>
     :host { display: contents; }
     .overlay {
@@ -110,7 +122,7 @@ TEMPLATE.innerHTML = `
   </div>
 `;
 
-export class VinScanner extends HTMLElement {
+export class VinScanner extends BaseElement {
   #state = STATE.IDLE;
   #worker = null;
   #stream = null;
@@ -135,7 +147,7 @@ export class VinScanner extends HTMLElement {
   connectedCallback() {
     if (!this.shadowRoot) {
       const root = this.attachShadow({ mode: "open" });
-      root.appendChild(TEMPLATE.content.cloneNode(true));
+      root.appendChild(getTemplate().content.cloneNode(true));
 
       this.#overlayEl = root.querySelector(".overlay");
       this.#video = root.querySelector("video");

@@ -124,8 +124,15 @@ are not picked up. The wasm binary must be served with `Content-Type: applicatio
 The package also exports pure functions you can use without the component:
 
 ```js
-import { isVinShape, checkDigitOk, computeCheckDigit, wmiKnown, createConsensusTracker } from "vin-scanner";
+import {
+  isVinShape, checkDigitOk, computeCheckDigit, wmiKnown,
+  createConsensusTracker, SUPPORTED_LOCALES,
+} from "vin-scanner";
 ```
+
+Importing the package root is safe outside the browser (SSR, tests): the custom element is
+only registered when `customElements` exists. Internal modules are reachable as
+`vin-scanner/src/*` (for example the worker URL), but only the root exports are considered stable.
 
 ## How it works
 
